@@ -4,14 +4,9 @@ using System.Diagnostics;
 
 namespace MindfulTime.UI.Controllers
 {
-    public class WorkSpaceController : Controller
+    public class WorkSpaceController(ILogger<WorkSpaceController> logger) : Controller
     {
-        private readonly ILogger<WorkSpaceController> _logger;
-
-        public WorkSpaceController(ILogger<WorkSpaceController> logger)
-        {
-            _logger = logger;
-        }
+        private readonly ILogger<WorkSpaceController> _logger = logger;
 
         public IActionResult Auth()
         {
