@@ -41,14 +41,7 @@
                                             <label asp-for="Password">Пароль</label>
                                             <span asp-validation-for="Password" class="text-danger"></span>
                                         </div>
-                                        
-                                            <div class="form-check mb-3">
-                                                <input class="form-check-input" id="inputRememberPassword" type="checkbox" value="" />
-                                                <label class="form-check-label" for="inputRememberPassword">Запомнить пароль</label>
 
-                                            </div>
-                                     
-                                        
                                         <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
                                             <a asp-action="LoginGoogle" class="google-btn">
                                                 <span class="material-icons">login</span> Войти через Google
@@ -58,9 +51,6 @@
                                         </div>
                                     </form>
                                 </div>
-                               @*  <div class="card-footer text-center py-3">
-                                <div class="small"><a href="register.html">Нет аккаунта? Пройдите регистрацию</a></div>
-                                </div> *@
                             </div>
                         </div>
                     </div>
@@ -73,11 +63,6 @@
                 <div class="container-fluid px-4">
                     <div class="d-flex align-items-center justify-content-between small">
                         <div class="text-muted">Copyright &copy; Новаторы</div>
-                        @*                         <div>
-                        <a href="#">Privacy Policy</a>
-                        &middot;
-                        <a href="#">Terms &amp; Conditions</a>
-                        </div> *@
                     </div>
                 </div>
             </footer>
@@ -114,9 +99,9 @@
 
     .mindful-time {
         font-size: 60px; /* размер шрифта */
-        background: -webkit-linear-gradient(left, #00f260, #0575e6);
+        background: -webkit-linear-gradient(left, #696969, #000000);
         -webkit-background-clip: padding-box;
-        -webkit-text-fill-color: tomato;
+        -webkit-text-fill-color: whitesmoke;
         animation: fadeIn 10s ease-in-out infinite;
         display: flex;
         border-radius: 20px;

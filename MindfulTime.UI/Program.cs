@@ -1,3 +1,7 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using MindfulTime.UI.Interfaces;
+using MindfulTime.UI.Services;
+
 namespace MindfulTime.UI
 {
     public class Program
@@ -8,7 +12,11 @@ namespace MindfulTime.UI
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(o =>
+            {
+                o.LoginPath = "/Auth";
+            });
+            builder.Services.AddTransient<IHttpRequestService, HttpRequestService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -23,7 +31,7 @@ namespace MindfulTime.UI
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
