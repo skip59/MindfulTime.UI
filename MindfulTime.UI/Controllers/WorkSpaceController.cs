@@ -4,6 +4,7 @@ using MindfulTime.UI.Interfaces;
 using MindfulTime.UI.Models;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using OpenClasses;
 
 namespace MindfulTime.UI.Controllers
 {
@@ -39,7 +40,28 @@ namespace MindfulTime.UI.Controllers
                 }
             };
             return RedirectToAction("Auth", "WorkSpace");
+        }
 
+        [HttpPost]
+        public async Task<IActionResult> AddEvent([FromBody] EventDTO _event)
+        {
+            if (ModelState.IsValid)
+            {
+                _event.EventId = Guid.NewGuid();
+                var response = await _httpRequestService.HttpRequest(URL.CALENDAR_CREATE_TASK, new StringContent(JsonConvert.SerializeObject(_event), encoding: System.Text.Encoding.UTF8, "application/json"));
+                if (response.Contains("FALSE")) return RedirectToAction("WorkSpace");
+                var responseModel = JsonConvert.DeserializeObject<AuthResponse>(response);
+                if (responseModel!.isOk)
+                {
+                    ViewBag.UserModel = responseModel;
+                    return View("WorkSpace");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "    ");
+                }
+            };
+            return RedirectToAction("Auth", "WorkSpace");
         }
 
 

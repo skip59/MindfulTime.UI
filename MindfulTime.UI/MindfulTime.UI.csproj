@@ -9,8 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\css\calendar.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="OpenClasses">
+      <HintPath>..\..\MindfulTime\OpenClasses\bin\Debug\net8.0\OpenClasses.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,86 @@
-﻿@using Newtonsoft.Json
+﻿<div id="calendar-wrapper">
+    <div id="calendar"></div>
+</div>
 
-@{
-    <p>@JsonConvert.SerializeObject(ViewBag.UserModel)</p>
-}
+<!-- Подключение CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.5.2/flatpickr.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="~/css/calendar.css" asp-append-version="true" />
+
+<!-- Модальное окно -->
+<div class="modal fade" id="eventModal" role="dialog" aria-labelledby="eventModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="eventModalLabel">Задача / событие</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="eventForm">
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Название</label>
+                        <div class="col-sm-9">
+                            <textarea class="form-control" id="EventTitle" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Время начала</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="StartTime">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Время окончания</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="EndTime">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Описание</label>
+                        <div class="col-sm-9">
+                            <textarea class="form-control" id="Description" rows="5"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row p-3">
+                        <label for="Priority" class="form-label">Приоритет</label>
+                        <input type="range" class="form-range" min="0" max="3" step="1" value="0" id="Priority">
+                        <label for="Complexity" class="form-label">Сложность</label>
+                        <input type="range" class="form-range" min="0" max="3" step="1" value="0" id="Complexity">
+                        <label for="Importance" class="form-label">Важность</label>
+                        <input type="range" class="form-range" min="0" max="3" step="1" value="0" id="Importance">
+                    </div>
+                    <div class="form-group row justify-content-between">
+                        
+                            <label><input type="checkbox" id="HasDependencies" /> У задачи есть зависимости</label>
+                        
+                            <label><input type="checkbox" id="AllDay" />Выполнять каждый день</label>
+                       
+                    </div>
+                    <input type="hidden" id="isNewEvent" />
+                    <input type="hidden" id="uid" value="@ViewBag.UserModel.Id" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="deleteEvent">Удалить</button>
+                <div>
+                    <button type="button" class="btn btn-dark" data-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" id="eventModalSave">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Подключение JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.5.2/flatpickr.min.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="~/js/calendar.js" asp-append-version="true"></script>
+
