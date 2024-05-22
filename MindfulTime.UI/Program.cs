@@ -16,6 +16,12 @@ namespace MindfulTime.UI
             {
                 o.LoginPath = "/Auth";
             });
+            builder.Services.AddSession(o =>
+            {
+                o.IdleTimeout = TimeSpan.FromMinutes(30);
+                o.Cookie.HttpOnly = true;
+                o.Cookie.IsEssential = true;
+            });
             builder.Services.AddTransient<IHttpRequestService, HttpRequestService>();
             var app = builder.Build();
 
@@ -33,7 +39,7 @@ namespace MindfulTime.UI
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseSession();
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=WorkSpace}/{action=Auth}");

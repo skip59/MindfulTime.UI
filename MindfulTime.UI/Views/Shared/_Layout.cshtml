@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using OpenClasses
+@model UserDto
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -32,47 +34,88 @@
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="#!">Личная страница</a></li>
+                    <li><form class="dropdown-item" asp-controller="WorkSpace" asp-action="PrivateUserPage" method="post" >
+                            <input type="hidden" name="Name" value="@Model.Name" />
+                            <input type="hidden" name="Id" value="@Model.Id" />
+                            <input type="hidden" name="Name" value="@Model.Name" />
+                            <input type="hidden" name="Role" value="@Model.Role" />
+                            <input type="hidden" name="Email" value="@Model.Email" />
+                            <input type="hidden" name="Password" value="password" />
+                        <button type="submit" class="dropdown-item">@Model.Name</button>
+                        </form></li>
                     <li><hr class="dropdown-divider" /></li>
                     <li><form class="dropdown-item" asp-controller="WorkSpace" asp-action="LogOut" method="post"><button type="submit" class="dropdown-item">Выход</button></form></li>
                 </ul>
             </li>
         </ul>
     </nav>
-    <div id="layoutSidenav">
-        <div id="layoutSidenav_nav">
-            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-                <div class="sb-sidenav-menu">
-                    <div class="nav">
-                        <div class="sb-sidenav-menu-heading">Задачи</div>
-                        <a class="nav-link" href="#">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                            Календарь
-                        </a>
-                        <a class="nav-link" asp-controller="WorkSpace" asp-action="Servers">
-                            <div class="sb-nav-link-icon"><i class="fas fa-cogs"></i></div>
-                            ToDo
-                        </a>
-                        <div class="sb-sidenav-menu-heading">Пользователи</div>
-                        <a class="nav-link collapsed" asp-controller="WorkSpace" asp-action="Clients">
-                            <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                            Редактирование пользователей
-                        </a>
-                    </div>
+    @{
+        if(Model.Role == "Admin")
+        {
+            <div id="layoutSidenav">
+                <div id="layoutSidenav_nav">
+                    <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                        <div class="sb-sidenav-menu">
+                            <div class="nav">
+                                <div class="sb-sidenav-menu-heading">Задачи</div>
+                                <a class="nav-link" asp-controller="WorkSpace" asp-action="WorkSpace">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                                    Календарь
+                                </a>
+                                <a class="nav-link" asp-controller="WorkSpace" asp-action="Servers">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-cogs"></i></div>
+                                    ToDo
+                                </a>
+                                <div class="sb-sidenav-menu-heading">Пользователи</div>
+                                <a class="nav-link collapsed" asp-controller="WorkSpace" asp-action="EditUsers">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
+                                    Редактирование пользователей
+                                </a>
+                            </div>
+                        </div>
+                    </nav>
                 </div>
-            </nav>
-        </div>
-        <div id="layoutSidenav_content">
-            <main>
-                @RenderBody()
-            </main>
-            
-        </div>
+                <div id="layoutSidenav_content">
+                    <main>
+                        @RenderBody()
+                    </main>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div id="layoutSidenav">
+                <div id="layoutSidenav_nav">
+                    <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                        <div class="sb-sidenav-menu">
+                            <div class="nav">
+                                <div class="sb-sidenav-menu-heading">Задачи</div>
+                                <a class="nav-link" href="#">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                                    Календарь
+                                </a>
+                                <a class="nav-link" asp-controller="WorkSpace" asp-action="Servers">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-cogs"></i></div>
+                                    ToDo
+                                </a>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+                <div id="layoutSidenav_content">
+                    <main>
+                        @RenderBody()
+                    </main>
 
-    </div>
+                </div>
+
+            </div>
+        }
+    }
+    
     <script src="js/scripts.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+@*     <script src="~/lib/jquery/dist/jquery.min.js"></script> *@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

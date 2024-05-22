@@ -108,7 +108,7 @@ function addEvent(start, end) {
  * Modal
  **/
 
-$('#eventModalSave').click(function () {
+$('#eventModalSave').on('click', function () {
     var title = $('#EventTitle').val();
     var description = $('#Description').val();
     var startTime = moment($('#StartTime').val(), "YYYY-MM-DD HH:mm");
@@ -119,7 +119,6 @@ $('#eventModalSave').click(function () {
     var complexity = $('#Complexity').val();
     var importance = $('#Importance').val();
     var hasDependencies = $('#HasDependencies').is(":checked");
-    var uid = $('#uid').val();
 
     if (startTime > endTime) {
         alert('Дата начала не должна быть больше даты окончания задачи.');
@@ -139,7 +138,6 @@ $('#eventModalSave').click(function () {
         complexity: complexity,
         importance: importance,
         hasDependencies: hasDependencies,
-        uid: uid
     };
 
     if (isNewEvent) {
@@ -162,8 +160,6 @@ function sendAddEvent(event) {
             "Priority": event.priority,
             "Complexity": event.complexity,
             "Importance": event.importance,
-            "UserId": event.uid
-
         }
     }).then(function (res) {
         var { message, eventId } = res.data;
@@ -175,12 +171,11 @@ function sendAddEvent(event) {
                 allDay: event.isAllDay,
                 title: event.title,
                 description: event.description,
-                eventId: eventId,
-                priority: priority,
-                complexity: complexity,
-                importance: importance,
-                hasDependencies: hasDependencies,
-                uid: uid
+                eventId: event.eventId,
+                priority: event.priority,
+                complexity: event.complexity,
+                importance: event.importance,
+                hasDependencies: event.hasDependencies,
             };
             $('#calendar').fullCalendar('renderEvent', newEvent);
             $('#calendar').fullCalendar('unselect');
@@ -207,7 +202,6 @@ function sendUpdateEvent(event) {
             "Priority": event.priority,
             "Complexity": event.complexity,
             "Importance": event.importance,
-            "UserId": event.uid
         }
     }).then(function (res) {
         var message = res.data.message;
@@ -228,7 +222,7 @@ function sendUpdateEvent(event) {
     });
 }
 
-$('#deleteEvent').click(function () {
+$('#deleteEvent').on('click', function () {
     if (confirm(`Вы действительно хотите удалить задачу "${currentEvent.title}"?`)) {
         axios({
             method: 'post',
