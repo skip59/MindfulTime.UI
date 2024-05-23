@@ -18,6 +18,67 @@ namespace MindfulTime.UI.Controllers
             return View();
         }
 
+        #region Работа с пользователями
+
+        [HttpPost]
+        public async Task<string> AddUser(UserDto user)
+        {
+            if (ModelState.IsValid)
+            {
+                var response = await _httpRequestService.HttpRequest(URL.AUTH_CREATE_USER, new StringContent(JsonConvert.SerializeObject(user), encoding: System.Text.Encoding.UTF8, "application/json"));
+                if (response.Contains("FALSE")) return response;
+            }
+            return ModelState.ToString();
+        }
+
+        [HttpPost]
+        [Route("WorkSpace")]
+        public async Task<IActionResult> LoginTo(AuthUserModel userModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await CheckUserFromDb(userModel);
+                if (result.Id == Guid.Empty) return RedirectToAction("Auth", "WorkSpace");
+                if (result.Id != Guid.Empty)
+                {
+                    HttpContext.Session.SetString("CurrentUserId", result.Id.ToString());
+                    HttpContext.Session.SetString("CurrentUserName", result.Name.ToString());
+                    HttpContext.Session.SetString("CurrentUserPassword", userModel.Password);
+                    HttpContext.Session.SetString("CurrentUserEmail", userModel.Email);
+                    HttpContext.Session.SetString("CurrentUserRole", result.Role);
+                    return View("WorkSpace", result);
+                }
+                else
+                {
+                    ModelState.AddModelError("", "    ");
+                }
+            };
+            return RedirectToAction("Auth", "WorkSpace");
+        }
+
+        [HttpPost]
+        public IActionResult PrivateUserPage(UserDto userDto)
+        {
+            if (ModelState.IsValid)
+            {
+                return View(userDto);
+            }
+            return View("Error");
+        }
+
+        [Route("WorkSpace")]
+        public async Task<IActionResult> WorkSpace()
+        {
+            var userModel = new AuthUserModel
+            {
+                Email = HttpContext.Session.GetString("CurrentUserEmail"),
+                Password = HttpContext.Session.GetString("CurrentUserPassword")
+            };
+            var result = await CheckUserFromDb(userModel);
+            if (result.Id == Guid.Empty) return RedirectToAction("Auth", "WorkSpace");
+            return View(result);
+        }
+
         [Route("Users")]
         public async Task<IActionResult> EditUsers()
         {
@@ -57,30 +118,43 @@ namespace MindfulTime.UI.Controllers
         }
 
         [HttpPost]
-        [Route("WorkSpace")]
-        public async Task<IActionResult> LoginTo(AuthUserModel userModel)
+        [Route("LogOut")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LogOut()
+        {
+            await HttpContext.SignOutAsync();
+            HttpContext.Session.Clear();
+            return RedirectToAction("Auth", "WorkSpace");
+        }
+
+        [HttpPost]
+        public async Task<bool> DeleteUser(UserDto user)
+        {
+            if(ModelState.IsValid)
+            {
+                var response = await _httpRequestService.HttpRequest(URL.AUTH_DELETE_USER, new StringContent(JsonConvert.SerializeObject(user), encoding: System.Text.Encoding.UTF8, "application/json"));
+                if (response.Contains("FALSE")) return false;
+                return true;
+            }
+           return false;
+        }
+
+        [HttpPost]
+        public async Task<bool> UpdateUser(UserDto user)
         {
             if (ModelState.IsValid)
             {
-                var response = await _httpRequestService.HttpRequest(URL.AUTH_CHECK_USER, new StringContent(JsonConvert.SerializeObject(userModel), encoding: System.Text.Encoding.UTF8, "application/json"));
-                if (response.Contains("FALSE")) return RedirectToAction("Auth", "WorkSpace");
-                var responseModel = JsonConvert.DeserializeObject<UserDto>(response);
-                if (responseModel!.Id != Guid.Empty)
-                {
-                    HttpContext.Session.SetString("CurrentUserId", responseModel.Id.ToString());
-                    HttpContext.Session.SetString("CurrentUserName", responseModel.Name.ToString());
-                    HttpContext.Session.SetString("CurrentUserPassword", userModel.Password);
-                    HttpContext.Session.SetString("CurrentUserEmail", userModel.Email);
-                    HttpContext.Session.SetString("CurrentUserRole", responseModel.Role);
-                    return View("WorkSpace", responseModel);
-                }
-                else
-                {
-                    ModelState.AddModelError("", "    ");
-                }
-            };
-            return RedirectToAction("Auth", "WorkSpace");
+                var response = await _httpRequestService.HttpRequest(URL.AUTH_UPDATE_USER, new StringContent(JsonConvert.SerializeObject(user), encoding: System.Text.Encoding.UTF8, "application/json"));
+                if (response.Contains("FALSE")) return false;
+                return true;
+            }
+            return false;
         }
+
+        #endregion
+
+
+        #region Работа с календарем
 
         [HttpPost]
         public async Task<IActionResult> AddEvent([FromBody] EventDTO _event)
@@ -98,39 +172,6 @@ namespace MindfulTime.UI.Controllers
             return null;
         }
 
-        [HttpPost]
-        public IActionResult PrivateUserPage(UserDto userDto)
-        {
-            if (ModelState.IsValid)
-            {
-                return View(userDto);
-            }
-            return View("Error");
-        }
-        [Route("WorkSpace")]
-        public async Task<IActionResult> WorkSpace()
-        {
-            var userModel = new AuthUserModel
-            {
-                Email = HttpContext.Session.GetString("CurrentUserEmail"),
-                Password = HttpContext.Session.GetString("CurrentUserPassword")
-            };
-            var response = await _httpRequestService.HttpRequest(URL.AUTH_CHECK_USER, new StringContent(JsonConvert.SerializeObject(userModel), encoding: System.Text.Encoding.UTF8, "application/json"));
-            if (response.Contains("FALSE")) return RedirectToAction("Auth", "WorkSpace");
-            var responseModel = JsonConvert.DeserializeObject<UserDto>(response);
-            return View(responseModel);
-        }
-
-        [HttpPost]
-        [Route("LogOut")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LogOut()
-        {
-            await HttpContext.SignOutAsync();
-            HttpContext.Session.Clear();
-            return RedirectToAction("Auth", "WorkSpace");
-        }
-
         [HttpGet]
         public async Task<string> GetCalendarEvents()
         {
@@ -144,10 +185,31 @@ namespace MindfulTime.UI.Controllers
             return response;
         }
 
+
+        #endregion
+
+
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        private async Task<UserDto> CheckUserFromDb(AuthUserModel authUser)
+        {
+            try
+            {
+                var response = await _httpRequestService.HttpRequest(URL.AUTH_CHECK_USER, new StringContent(JsonConvert.SerializeObject(authUser), encoding: System.Text.Encoding.UTF8, "application/json"));
+                if (response.Contains("FALSE")) return new UserDto();
+                var responseModel = JsonConvert.DeserializeObject<UserDto>(response);
+                return responseModel;
+            }
+            catch (Exception)
+            {
+                return new UserDto();
+            }
+            
         }
     }
 }

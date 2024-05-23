@@ -4,13 +4,13 @@
     ViewData["Title"] = "EditUsers";
     var users = ViewBag.AllUsers as List<UserDto>;
 }
-
-<div class="container mt-5">
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<div class="container mt-3">
     <h1 class="mb-4">Управление пользователями</h1>
-    <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addUserModal">
+    <button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addUserModal">
         Добавить пользователя
     </button>
-    <table class="table table-bordered">
+    <table class="table table-bordered table-striped">
         <thead>
             <tr>
                 <th>Имя</th>
@@ -29,8 +29,9 @@
                         <td>@user.Email</td>
                         <td>@user.Role</td>
                         <td>
-                            <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editUserModal" data-id="@user.Id">Изменить</button>
-                            <button type="button" class="btn btn-danger btn-sm" onclick="deleteUser('@user.Id')">Удалить</button>
+
+                            <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editUserModal" onclick="updateUser('@user.Id', '@user.Email', '@user.Password')">Изменить</button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="deleteUser('@user.Id', '@user.Email', '@user.Password')">Удалить</button>
                         </td>
                     </tr>
                 }
@@ -60,6 +61,10 @@
                         <input type="email" class="form-control" id="addUserEmail" name="Email" required>
                     </div>
                     <div class="form-group">
+                        <label for="addUserPassword">Пароль</label>
+                        <input type="password" class="form-control" id="addUserPassword" name="Password" required>
+                    </div>
+                    <div class="form-group">
                         <label for="addUserRole">Роль</label>
                         <input type="text" class="form-control" id="addUserRole" name="Role" required>
                     </div>
@@ -82,14 +87,9 @@
             </div>
             <div class="modal-body">
                 <form id="editUserForm">
-                    <input type="hidden" id="editUserId" name="Id">
                     <div class="form-group">
                         <label for="editUserName">Имя</label>
                         <input type="text" class="form-control" id="editUserName" name="Name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editUserEmail">Email</label>
-                        <input type="email" class="form-control" id="editUserEmail" name="Email" required>
                     </div>
                     <div class="form-group">
                         <label for="editUserRole">Роль</label>
@@ -102,32 +102,47 @@
     </div>
 </div>
 
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
 <script>
-    function deleteUser(userId) {
+    var id;
+    var email;
+    var pass;
+    function deleteUser(userId, userEmail, userPassword) {
         $.ajax({
-            url: '/WorkSpace/DeleteUser/' + userId,
-            type: 'DELETE',
+            url: '/WorkSpace/DeleteUser',
+            type: 'POST',
+            data: {
+                Id: userId,
+                Email: userEmail,
+                Password: userPassword
+            },
             success: function (result) {
                 location.reload();
             }
         });
     }
 
-    $('#editUserModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var userId = button.data('id');
+    function updateUser(userId, userEmail, userPassword) {
+        id = userId,
+        email = userEmail,
+        pass = userPassword
+    }
 
-        $.ajax({
-            url: '/WorkSpace/GetUser/' + userId,
-            type: 'GET',
-            success: function (user) {
-                $('#editUserId').val(user.Id);
-                $('#editUserName').val(user.Name);
-                $('#editUserEmail').val(user.Email);
-                $('#editUserRole').val(user.Role);
-            }
-        });
-    });
+    // $('#editUserModal').on('show.bs.modal', function (event) {
+    //     var button = $(event.relatedTarget);
+    //     var userId = button.data('id');
+
+    //     $.ajax({
+    //         url: '/WorkSpace/GetUser/' + userId,
+    //         type: 'GET',
+    //         success: function (user) {
+    //             $('#editUserId').val(user.Id);
+    //             $('#editUserName').val(user.Name);
+    //             $('#editUserRole').val(user.Role);
+    //         }
+    //     });
+    // });
 
     $('#addUserForm').on('submit', function (event) {
         event.preventDefault();
@@ -143,13 +158,21 @@
 
     $('#editUserForm').on('submit', function (event) {
         event.preventDefault();
+        var uname = $('#editUserName').val();
+        var urole = $('#editUserRole').val();
         $.ajax({
-            url: '/WorkSpace/EditUser',
+            url: '/WorkSpace/UpdateUser',
             type: 'POST',
-            data: $(this).serialize(),
+            data: {
+                Id: id,
+                Email: email,
+                Password: pass,
+                Name: uname,
+                Role: urole
+            },
             success: function (result) {
                 location.reload();
             }
         });
     });
-</script>
+    </script>

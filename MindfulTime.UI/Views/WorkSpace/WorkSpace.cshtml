@@ -45,20 +45,27 @@
                         </div>
                     </div>
                     
-                    <div class="form-group row p-3">
-                        <label for="Priority" class="form-label">Приоритет</label>
-                        <input type="range" class="form-range" min="0" max="3" step="1" value="0" id="Priority">
-                        <label for="Complexity" class="form-label">Сложность</label>
-                        <input type="range" class="form-range" min="0" max="3" step="1" value="0" id="Complexity">
-                        <label for="Importance" class="form-label">Важность</label>
-                        <input type="range" class="form-range" min="0" max="3" step="1" value="0" id="Importance">
+                    <div class="row p-3">
+                        <div class="col-4">
+                            <label for="Priority" class="form-label">Приоритет</label>
+                            <input type="range" class="form-range" min="1" max="3" step="1" value="1" id="Priority">
+                        </div>
+                        <div class="col-4">
+                            <label for="Complexity" class="form-label">Сложность</label>
+                            <input type="range" class="form-range" min="1" max="3" step="1" value="1" id="Complexity">
+                        </div>
+                        <div class="col-4">
+                            <label for="Importance" class="form-label">Важность</label>
+                            <input type="range" class="form-range" min="1" max="3" step="1" value="1" id="Importance">
+                        </div>
                     </div>
-                    <div class="form-group row justify-content-between">
-                        
-                            <label><input type="checkbox" id="HasDependencies" /> У задачи есть зависимости</label>
-                        
+                    <div class="row p-3 ">
+                        <div class="col-6 justify-content-start">
+                            <label><input type="checkbox" id="HasDependencies" /> Есть зависимости</label>
+                        </div>
+                        <div class="col-6 justify-content-end">
                             <label><input type="checkbox" id="AllDay" />Выполнять каждый день</label>
-                       
+                       </div>
                     </div>
                     <input type="hidden" id="isNewEvent" />
                 </form>
@@ -73,7 +80,23 @@
         </div>
     </div>
 </div>
+<style>
+    .d-flex {
+        display: flex;
+    }
 
+    .flex-column {
+        flex-direction: column;
+    }
+
+    .me-3 {
+        margin-right: 1rem; /* Если у вас уже есть классы Bootstrap, это добавляет отступ справа */
+    }
+
+    .align-items-center {
+        align-items: center;
+    }
+</style>
 <!-- Подключение JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
