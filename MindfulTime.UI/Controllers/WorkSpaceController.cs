@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using MindfulTime.UI.Interfaces;
 using MindfulTime.UI.Models;
 using Newtonsoft.Json;
-using OpenClasses;
+using OpenClasses.Auth;
+using OpenClasses.Calendar;
 using System.Diagnostics;
 
 namespace MindfulTime.UI.Controllers
