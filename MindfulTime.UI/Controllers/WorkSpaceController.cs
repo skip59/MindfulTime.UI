@@ -51,7 +51,7 @@ namespace MindfulTime.UI.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", "    ");
+                    ModelState.AddModelError("", "Пользователь не найден");
                 }
             };
             return RedirectToAction("Auth", "WorkSpace");
