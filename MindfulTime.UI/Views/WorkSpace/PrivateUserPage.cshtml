@@ -48,7 +48,7 @@
             <h4>Настройки</h4>
         </div>
         <div class="card-body">
-            <form id="editUserForm" method="post" asp-action="UpdateUser">
+            <form id="updateUserSettings">
                 <div class="mb-3 row">
                     <div class="col-sm-4">Уведомления</div>
                     <div class="col-sm-8">
@@ -79,49 +79,14 @@
                             <input class="form-text" type="number" name="TelegramId" id="tid" />
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary col-4 mt-3">Сохранить изменения</button>
+                    <button type="submit" id="confirmUserSettings" class="btn btn-primary col-4 mt-3">Сохранить изменения</button>
                 </div>
-                
             </form>
         </div>
     </div>
 </div>
 
- <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const sendMessageCheck = document.getElementById('sendMessageCheck');
-        const notificationOptions = document.getElementById('notificationOptions');
-
-        sendMessageCheck.addEventListener('change', function () {
-            if (this.checked) {
-                notificationOptions.style.display = 'block';
-            } else {
-                notificationOptions.style.display = 'none';
-            }
-        });
-
-        // Initialize the visibility based on the initial state
-        if (sendMessageCheck.checked) {
-            notificationOptions.style.display = 'block';
-        }
-    });
-    // $('#editUserForm').on('submit', function (event) {
-    //     event.preventDefault();
-    //     var uname = $('#editUserName').val();
-    //     var urole = $('#editUserRole').val();
-    //     $.ajax({
-    //         url: '/WorkSpace/UpdateUser',
-    //         type: 'POST',
-    //         data: {
-    //             Id: id,
-    //             Email: email,
-    //             Password: pass,
-    //             Name: uname,
-    //             Role: urole
-    //         },
-    //         success: function (result) {
-    //             location.reload();
-    //         }
-    //     });
-    // });
- </script>
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/updatenitify.js"></script>
+}
