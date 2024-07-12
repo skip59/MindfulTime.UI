@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MindfulTime.UI.Interfaces;
 using MindfulTime.UI.Models;
@@ -47,6 +48,8 @@ namespace MindfulTime.UI.Controllers
                     HttpContext.Session.SetString("CurrentUserPassword", userModel.Password);
                     HttpContext.Session.SetString("CurrentUserEmail", userModel.Email);
                     HttpContext.Session.SetString("CurrentUserRole", result.Role);
+                    HttpContext.Session.SetString("CurrentUserTid", string.IsNullOrEmpty(result.TelegramId) ? "0" : result.TelegramId);
+                    HttpContext.Session.SetString("CurrentUserIsNotify", result.IsSendMessage.ToString());
                     return View("WorkSpace", result);
                 }
                 else
@@ -62,6 +65,7 @@ namespace MindfulTime.UI.Controllers
         {
             if (ModelState.IsValid)
             {
+                //var user = new 
                 return View(userDto);
             }
             return View("Error");
@@ -140,8 +144,7 @@ namespace MindfulTime.UI.Controllers
            return false;
         }
 
-        [HttpPost]
-        public async Task<bool> UpdateUser(UserDto user)
+        public async Task<bool> UpdateUser([FromBody]UserDto user)
         {
             if (ModelState.IsValid)
             {

@@ -5,123 +5,94 @@
     ViewData["Title"] = "UserPage";
 }
 
-<div class="mt-2 row d-flex justify-content-start">
-    <div class="card col-7">
-        <div class="card-header">
-            <h2>Личная страница</h2>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <label for="userEmail" class="col-sm-4 col-form-label">Email</label>
-                <div class="col-sm-8">
-                    <input type="email" readonly class="form-control-plaintext" id="userEmail" value="@Model.Email">
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Личная страница</h2>
                 </div>
-            </div>
-            <div class="row">
-                <label for="userName" class="col-sm-4 col-form-label">Имя</label>
-                <div class="col-sm-8">
-                    <input type="text" readonly class="form-control-plaintext" id="userName" value="@Model.Name">
-                </div>
-            </div>
-            <div class=" row">
-                <label for="userRole" class="col-sm-4 col-form-label">Роль</label>
-                <div class="col-sm-8">
-                    <input type="text" readonly class="form-control-plaintext" id="userRole" value="@Model.Role">
-                </div>
-            </div>
-            <div class=" row">
-                <label for="userTelegramId" class="col-sm-4 col-form-label">Telegram ID</label>
-                <div class="col-sm-8">
-                    <input type="text" readonly class="form-control-plaintext" id="userTelegramId" value="@(string.IsNullOrEmpty(Model.TelegramId) ? "Не задан" : Model.TelegramId)">
-                </div>
-            </div>
-            <div class="row">
-                <label for="userIsSendMessage" class="col-sm-4 col-form-label">Получать уведомления</label>
-                <div class="col-sm-8">
-                    <input type="text" readonly class="form-control-plaintext" id="userIsSendMessage" value="@(Model.IsSendMessage ? "Да" : "Нет")">
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card col-5">
-        <div class="card-header">
-            <h4>Настройки</h4>
-        </div>
-        <div class="card-body">
-            <form id="editUserForm" method="post" asp-action="UpdateUser">
-                <div class="mb-3 row">
-                    <div class="col-sm-4">Уведомления</div>
-                    <div class="col-sm-8">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="sendMessageCheck" @(Model.IsSendMessage ? "checked" : "")>
-                            <label class="form-check-label" for="sendMessageCheck">
-                                Получать уведомления
-                            </label>
+                <div class="card-body">
+                    <div class="mb-3 row">
+                        <label for="userEmail" class="col-sm-4 col-form-label">Email</label>
+                        <div class="col-sm-8">
+                            <input type="email" readonly class="form-control-plaintext" id="userEmail" value="@Model.Email">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="userName" class="col-sm-4 col-form-label">Имя</label>
+                        <div class="col-sm-8">
+                            <input type="text" readonly class="form-control-plaintext" id="userName" value="@Model.Name">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="userRole" class="col-sm-4 col-form-label">Роль</label>
+                        <div class="col-sm-8">
+                            <input type="text" readonly class="form-control-plaintext" id="userRole" value="@Model.Role">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="userTelegramId" class="col-sm-4 col-form-label">Telegram ID</label>
+                        <div class="col-sm-8">
+                            <input type="text" readonly class="form-control-plaintext" id="userTelegramId" value="@(string.IsNullOrEmpty(Model.TelegramId) ? "Не задан" : Model.TelegramId)">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="userIsSendMessage" class="col-sm-4 col-form-label">Получать уведомления</label>
+                        <div class="col-sm-8">
+                            <input type="text" readonly class="form-control-plaintext" id="userIsSendMessage" value="@(Model.IsSendMessage ? "Да" : "Нет")">
                         </div>
                     </div>
                 </div>
-                <div class="mb-3 row" id="notificationOptions" style="display: none;">
-                    <label class="col-sm-6 col-form-label">Получать уведомления на:</label>
-                    <div class="col-sm-6">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="notificationOption" id="notifyEmail" value="email">
-                            <label class="form-check-label" for="notifyEmail">
-                                Email
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="notificationOption" id="notifyTelegram" value="telegram">
-                            <label class="form-check-label" for="notifyTelegram">
-                                Telegram
-                            </label>
-                            <input hidden class="form-text" name="Id" value="@Model.Id" />
-                            <input hidden class="form-text" name="Email" value="@Model.Email" />
-                            <input class="form-text" type="number" name="TelegramId" id="tid" />
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary col-4 mt-3">Сохранить изменения</button>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Настройки</h4>
                 </div>
-                
-            </form>
+                <div class="card-body">
+                    <form id="updateUserSettings">
+                        <div class="mb-3 row">
+                            <div class="col-sm-4">Уведомления</div>
+                            <div class="col-sm-8">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="sendMessageCheck" @(Model.IsSendMessage ? "checked" : "")>
+                                    <label class="form-check-label" for="sendMessageCheck">
+                                        Получать уведомления
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3 row" id="notificationOptions" style="display: none;">
+                            <label class="col-sm-6 col-form-label">Получать уведомления на:</label>
+                            <div class="col-sm-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="notificationOption" id="notifyEmail" value="email">
+                                    <label class="form-check-label" for="notifyEmail">
+                                        Email
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="notificationOption" id="notifyTelegram" value="telegram">
+                                    <label class="form-check-label" for="notifyTelegram">
+                                        Telegram
+                                    </label>
+                                </div>
+                                <input hidden class="form-text" name="Id" value="@Model.Id" />
+                                <input hidden class="form-text" name="Email" value="@Model.Email" />
+                                <input class="form-text" type="number" name="TelegramId" id="tid" class="form-control mt-2" placeholder="Введите Telegram ID" />
+                            </div>
+                        </div>
+                        <button type="submit" id="confirmUserSettings" class="btn btn-primary mt-3 w-100">Сохранить изменения</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
- <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const sendMessageCheck = document.getElementById('sendMessageCheck');
-        const notificationOptions = document.getElementById('notificationOptions');
-
-        sendMessageCheck.addEventListener('change', function () {
-            if (this.checked) {
-                notificationOptions.style.display = 'block';
-            } else {
-                notificationOptions.style.display = 'none';
-            }
-        });
-
-        // Initialize the visibility based on the initial state
-        if (sendMessageCheck.checked) {
-            notificationOptions.style.display = 'block';
-        }
-    });
-    // $('#editUserForm').on('submit', function (event) {
-    //     event.preventDefault();
-    //     var uname = $('#editUserName').val();
-    //     var urole = $('#editUserRole').val();
-    //     $.ajax({
-    //         url: '/WorkSpace/UpdateUser',
-    //         type: 'POST',
-    //         data: {
-    //             Id: id,
-    //             Email: email,
-    //             Password: pass,
-    //             Name: uname,
-    //             Role: urole
-    //         },
-    //         success: function (result) {
-    //             location.reload();
-    //         }
-    //     });
-    // });
- </script>
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/updatenitify.js"></script>
+}

@@ -40,6 +40,8 @@
                             <input type="hidden" name="Name" value="@Model.Name" />
                             <input type="hidden" name="Role" value="@Model.Role" />
                             <input type="hidden" name="Email" value="@Model.Email" />
+                            <input type="hidden" name="TelegramId" value="@Model.TelegramId" />
+                            <input type="hidden" name="IsSendMessage" value="@Model.IsSendMessage.ToString()" />
                             <input type="hidden" name="Password" value="password" />
                         <button type="submit" class="dropdown-item">@Model.Name</button>
                         </form></li>
@@ -115,7 +117,7 @@
     
     <script src="js/scripts.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
-@*     <script src="~/lib/jquery/dist/jquery.min.js"></script> *@
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
