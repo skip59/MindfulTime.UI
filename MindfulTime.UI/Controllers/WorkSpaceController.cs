@@ -44,13 +44,6 @@ namespace MindfulTime.UI.Controllers
                 if (result.Id == Guid.Empty) return RedirectToAction("Auth", "WorkSpace");
                 if (result.Id != Guid.Empty)
                 {
-                    HttpContext.Session.SetString("CurrentUserId", result.Id.ToString());
-                    HttpContext.Session.SetString("CurrentUserName", result.Name.ToString());
-                    HttpContext.Session.SetString("CurrentUserPassword", userModel.Password);
-                    HttpContext.Session.SetString("CurrentUserEmail", userModel.Email);
-                    HttpContext.Session.SetString("CurrentUserRole", result.Role);
-                    HttpContext.Session.SetString("CurrentUserTid", string.IsNullOrEmpty(result.TelegramId) ? "0" : result.TelegramId);
-                    HttpContext.Session.SetString("CurrentUserIsNotify", result.IsSendMessage.ToString());
                     return View("WorkSpace", result);
                 }
                 else
