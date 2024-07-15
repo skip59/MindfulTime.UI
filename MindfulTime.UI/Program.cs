@@ -22,6 +22,7 @@ namespace MindfulTime.UI
                 o.Cookie.HttpOnly = true;
                 o.Cookie.IsEssential = true;
             });
+
             builder.Services.AddTransient<IHttpRequestService, HttpRequestService>();
             var app = builder.Build();
 

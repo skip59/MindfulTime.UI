@@ -157,6 +157,42 @@ namespace MindfulTime.UI.Controllers
 
         #endregion
 
+        #region Работа с нейросетью
+
+        [Route("EditML")]
+        public async Task<IActionResult> EditML()
+        {
+            var userModel = new AuthUserModel
+            {
+                Email = HttpContext.Session.GetString("CurrentUserEmail"),
+                Password = HttpContext.Session.GetString("CurrentUserPassword")
+            };
+            var result = await CheckUserFromDb(userModel);
+            if (result.Id == Guid.Empty) return RedirectToAction("Auth", "WorkSpace");
+            return View("EditML",result);
+        }
+
+        [HttpPost]
+        [RequestFormLimits(MultipartBodyLengthLimit = 6104857600)]
+        public async Task<IActionResult> UploadFile([FromQuery] int brandId, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return Content("Файл не выбран");
+
+            var path = Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        file.FileName);
+
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return RedirectToAction("EditML");
+        }
+
+        #endregion
+
 
         #region Работа с календарем
 

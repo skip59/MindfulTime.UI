@@ -1,0 +1,79 @@
+﻿@using OpenClasses.Auth
+
+@{
+    ViewData["Title"] = "EditML";
+    var users = ViewBag.AllUsers as List<UserDto>;
+}
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<div class="container mt-3">
+    <h1 class="mb-4">Управление нейросетью</h1>
+    <h2 class="mb-4">
+        Добавить файл в формате CSV
+    </h2>
+
+    @using (Html.BeginForm("UploadFile", "WorkSpace", FormMethod.Post, new {enctype="multipart/form-data"}))
+    {
+        <input type="file" name="upload" accept=".csv"/><br>
+        <input type="submit" value="Загрузить" />
+    }
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+<script>
+    var id;
+    var email;
+    var pass;
+    function deleteUser(userId, userEmail, userPassword) {
+        $.ajax({
+            url: '/WorkSpace/DeleteUser',
+            type: 'POST',
+            data: {
+                Id: userId,
+                Email: userEmail,
+                Password: userPassword
+            },
+            success: function (result) {
+                location.reload();
+            }
+        });
+    }
+
+    function updateUser(userId, userEmail, userPassword) {
+        id = userId,
+        email = userEmail,
+        pass = userPassword
+    }
+
+    $('#addUserForm').on('submit', function (event) {
+        event.preventDefault();
+        $.ajax({
+            url: '/WorkSpace/AddUser',
+            type: 'POST',
+            data: $(this).serialize(),
+            success: function (result) {
+                location.reload();
+            }
+        });
+    });
+
+    $('#editUserForm').on('submit', function (event) {
+        event.preventDefault();
+        var uname = $('#editUserName').val();
+        var urole = $('#editUserRole').val();
+        $.ajax({
+            url: '/WorkSpace/UpdateUser',
+            type: 'POST',
+            data: {
+                Id: id,
+                Email: email,
+                Password: pass,
+                Name: uname,
+                Role: urole
+            },
+            success: function (result) {
+                location.reload();
+            }
+        });
+    });
+    </script>
