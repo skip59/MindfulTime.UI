@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using MindfulTime.UI.Interfaces;
 using MindfulTime.UI.Models;
@@ -27,7 +28,7 @@ namespace MindfulTime.UI.Controllers
         {
             if (ModelState.IsValid)
             {
-                var response = await _httpRequestService.HttpRequest(URL.AUTH_CREATE_USER, new StringContent(JsonConvert.SerializeObject(user), encoding: System.Text.Encoding.UTF8, "application/json"));
+                var response = await _httpRequestService.HttpRequestPost(URL.AUTH_CREATE_USER, new StringContent(JsonConvert.SerializeObject(user), encoding: System.Text.Encoding.UTF8, "application/json"));
                 if (response.Contains("FALSE")) return response;
             }
             return ModelState.ToString();
@@ -106,7 +107,7 @@ namespace MindfulTime.UI.Controllers
                 Password = userPassword,
                 Name = userName
             };
-            var response = await _httpRequestService.HttpRequest(URL.AUTH_GET_USERS, new StringContent(JsonConvert.SerializeObject(userDto), encoding: System.Text.Encoding.UTF8, "application/json"));
+            var response = await _httpRequestService.HttpRequestPost(URL.AUTH_GET_USERS, new StringContent(JsonConvert.SerializeObject(userDto), encoding: System.Text.Encoding.UTF8, "application/json"));
             if (response.Contains("FALSE")) return RedirectToAction("Auth", "WorkSpace");
             List<UserDto> responseModel;
             try
@@ -137,7 +138,7 @@ namespace MindfulTime.UI.Controllers
         {
             if(ModelState.IsValid)
             {
-                var response = await _httpRequestService.HttpRequest(URL.AUTH_DELETE_USER, new StringContent(JsonConvert.SerializeObject(user), encoding: System.Text.Encoding.UTF8, "application/json"));
+                var response = await _httpRequestService.HttpRequestPost(URL.AUTH_DELETE_USER, new StringContent(JsonConvert.SerializeObject(user), encoding: System.Text.Encoding.UTF8, "application/json"));
                 if (response.Contains("FALSE")) return false;
                 return true;
             }
@@ -148,7 +149,7 @@ namespace MindfulTime.UI.Controllers
         {
             if (ModelState.IsValid)
             {
-                var response = await _httpRequestService.HttpRequest(URL.AUTH_UPDATE_USER, new StringContent(JsonConvert.SerializeObject(user), encoding: System.Text.Encoding.UTF8, "application/json"));
+                var response = await _httpRequestService.HttpRequestPost(URL.AUTH_UPDATE_USER, new StringContent(JsonConvert.SerializeObject(user), encoding: System.Text.Encoding.UTF8, "application/json"));
                 if (response.Contains("FALSE")) return false;
                 return true;
             }
@@ -162,6 +163,12 @@ namespace MindfulTime.UI.Controllers
         [Route("EditML")]
         public async Task<IActionResult> EditML()
         {
+            if (TempData["UploadResult"] != null)
+            {
+                var isShow = Convert.ToBoolean(TempData["UploadResult"].ToString());
+                ViewBag.ShowPopup = isShow;
+            }
+
             var userModel = new AuthUserModel
             {
                 Email = HttpContext.Session.GetString("CurrentUserEmail"),
@@ -174,7 +181,7 @@ namespace MindfulTime.UI.Controllers
 
         [HttpPost]
         [RequestFormLimits(MultipartBodyLengthLimit = 6104857600)]
-        public async Task<IActionResult> UploadFile([FromQuery] int brandId, IFormFile file)
+        public async Task<IActionResult> UploadFile(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return Content("Файл не выбран");
@@ -187,6 +194,10 @@ namespace MindfulTime.UI.Controllers
             {
                 await file.CopyToAsync(stream);
             }
+
+            var response = await _httpRequestService.HttpRequestPost(URL.TRAIN_ML, new StringContent(JsonConvert.SerializeObject(path), encoding: System.Text.Encoding.UTF8, "application/json"));
+
+            TempData["UploadResult"] = response;
 
             return RedirectToAction("EditML");
         }
@@ -203,7 +214,7 @@ namespace MindfulTime.UI.Controllers
             {
                 _event.EventId = Guid.NewGuid();
                 _event.UserId = Guid.Parse(HttpContext.Session.GetString("CurrentUserId"));
-                var response = await _httpRequestService.HttpRequest(URL.CALENDAR_CREATE_TASK, new StringContent(JsonConvert.SerializeObject(_event), encoding: System.Text.Encoding.UTF8, "application/json"));
+                var response = await _httpRequestService.HttpRequestPost(URL.CALENDAR_CREATE_TASK, new StringContent(JsonConvert.SerializeObject(_event), encoding: System.Text.Encoding.UTF8, "application/json"));
                 if (response.Contains("FALSE")) return null;
                 var responseModel = JsonConvert.DeserializeObject<EventDTO>(response);
                 string message = string.Empty;
@@ -221,7 +232,7 @@ namespace MindfulTime.UI.Controllers
             {
                 Id = Guid.Parse(userID)
             };
-            var response = await _httpRequestService.HttpRequest(URL.CALENDAR_GET_TASK, new StringContent(JsonConvert.SerializeObject(currentUser), encoding: System.Text.Encoding.UTF8, "application/json"));
+            var response = await _httpRequestService.HttpRequestPost(URL.CALENDAR_GET_TASK, new StringContent(JsonConvert.SerializeObject(currentUser), encoding: System.Text.Encoding.UTF8, "application/json"));
             return response;
         }
 
@@ -240,7 +251,7 @@ namespace MindfulTime.UI.Controllers
         {
             try
             {
-                var response = await _httpRequestService.HttpRequest(URL.AUTH_CHECK_USER, new StringContent(JsonConvert.SerializeObject(authUser), encoding: System.Text.Encoding.UTF8, "application/json"));
+                var response = await _httpRequestService.HttpRequestPost(URL.AUTH_CHECK_USER, new StringContent(JsonConvert.SerializeObject(authUser), encoding: System.Text.Encoding.UTF8, "application/json"));
                 if (response.Contains("FALSE")) return new UserDto();
                 var responseModel = JsonConvert.DeserializeObject<UserDto>(response);
                 return responseModel;

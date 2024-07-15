@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <Reference Include="OpenClasses">
-      <HintPath>..\..\MindfulTime\OpenClasses\bin\Debug\net8.0\OpenClasses.dll</HintPath>
+      <HintPath>..\..\..\MindfulTime\OpenClasses\bin\Debug\net8.0\OpenClasses.dll</HintPath>
     </Reference>
   </ItemGroup>
 
