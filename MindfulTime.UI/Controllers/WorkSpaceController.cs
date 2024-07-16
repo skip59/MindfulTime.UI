@@ -145,7 +145,8 @@ namespace MindfulTime.UI.Controllers
            return false;
         }
 
-        public async Task<bool> UpdateUser([FromBody]UserDto user)
+        [HttpPost]
+        public async Task<bool> UpdateUser(UserDto user)
         {
             if (ModelState.IsValid)
             {
