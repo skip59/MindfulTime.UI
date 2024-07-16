@@ -2,12 +2,16 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using MindfulTime.UI.Interfaces;
 using MindfulTime.UI.Models;
 using Newtonsoft.Json;
 using OpenClasses.Auth;
 using OpenClasses.Calendar;
 using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace MindfulTime.UI.Controllers
 {
@@ -41,8 +45,8 @@ namespace MindfulTime.UI.Controllers
             if (ModelState.IsValid)
             {
                 var result = await CheckUserFromDb(userModel);
-                if (result.Id == Guid.Empty) return RedirectToAction("Auth", "WorkSpace");
-                if (result.Id != Guid.Empty)
+                if (result.Role == null) return RedirectToAction("Auth", "WorkSpace");
+                if (result.Role != string.Empty)
                 {
                     return View("WorkSpace", result);
                 }
@@ -66,14 +70,20 @@ namespace MindfulTime.UI.Controllers
         }
 
         [Route("WorkSpace")]
-        public async Task<IActionResult> WorkSpace()
+        public async Task<IActionResult> WorkSpace(UserDto user)
         {
-            var userModel = new AuthUserModel
-            {
-                Email = HttpContext.Session.GetString("CurrentUserEmail"),
-                Password = HttpContext.Session.GetString("CurrentUserPassword")
-            };
-            var result = await CheckUserFromDb(userModel);
+            //var userModel = new AuthUserModel
+            //{
+            //    Email = HttpContext.Session.GetString("CurrentUserEmail"),
+            //    Password = HttpContext.Session.GetString("CurrentUserPassword")
+            //};
+            var userModel = GetUserFromCookies();
+            var result = await CheckUserFromDb(
+                new AuthUserModel 
+                { 
+                    Email = userModel.Email, 
+                    Password = userModel.Password
+                });
             if (result.Id == Guid.Empty) return RedirectToAction("Auth", "WorkSpace");
             return View(result);
         }
@@ -81,26 +91,27 @@ namespace MindfulTime.UI.Controllers
         [Route("Users")]
         public async Task<IActionResult> EditUsers()
         {
-            string userId = HttpContext.Session.GetString("CurrentUserId");
-            string userRole = HttpContext.Session.GetString("CurrentUserRole");
-            string userEmail = HttpContext.Session.GetString("CurrentUserEmail");
-            string userPassword = HttpContext.Session.GetString("CurrentUserPassword");
-            string userName = HttpContext.Session.GetString("CurrentUserName");
+            //string userId = HttpContext.Session.GetString("CurrentUserId");
+            //string userRole = HttpContext.Session.GetString("CurrentUserRole");
+            //string userEmail = HttpContext.Session.GetString("CurrentUserEmail");
+            //string userPassword = HttpContext.Session.GetString("CurrentUserPassword");
+            //string userName = HttpContext.Session.GetString("CurrentUserName");
 
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userRole) ||
-                string.IsNullOrEmpty(userEmail) || string.IsNullOrEmpty(userPassword))
-            {
-                return RedirectToAction("Auth", "WorkSpace");
-            }
-            UserDto userDto = new()
-            {
-                Id = Guid.Parse(userId),
-                Role = userRole,
-                Email = userEmail,
-                Password = userPassword,
-                Name = userName
-            };
-            var response = await _httpRequestService.HttpRequestPost(URL.AUTH_GET_USERS, new StringContent(JsonConvert.SerializeObject(userDto), encoding: System.Text.Encoding.UTF8, "application/json"));
+            //if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(userRole) ||
+            //    string.IsNullOrEmpty(userEmail) || string.IsNullOrEmpty(userPassword))
+            //{
+            //    return RedirectToAction("Auth", "WorkSpace");
+            //}
+            var user = GetUserFromCookies();
+            //UserDto userDto = new()
+            //{
+            //    Id = Guid.Parse(userId),
+            //    Role = userRole,
+            //    Email = userEmail,
+            //    Password = userPassword,
+            //    Name = userName
+            //};
+            var response = await _httpRequestService.HttpRequestPost(URL.AUTH_GET_USERS, new StringContent(JsonConvert.SerializeObject(user), encoding: System.Text.Encoding.UTF8, "application/json"));
             if (response.Contains("FALSE")) return RedirectToAction("Auth", "WorkSpace");
             List<UserDto> responseModel;
             try
@@ -113,7 +124,7 @@ namespace MindfulTime.UI.Controllers
                 return RedirectToAction("Auth", "WorkSpace");
             }
             ViewBag.AllUsers = responseModel;
-            return View(userDto);
+            return View(user);
         }
 
         [HttpPost]
@@ -129,16 +140,16 @@ namespace MindfulTime.UI.Controllers
         [HttpPost]
         public async Task<bool> DeleteUser(UserDto user)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 var response = await _httpRequestService.HttpRequestPost(URL.AUTH_DELETE_USER, new StringContent(JsonConvert.SerializeObject(user), encoding: System.Text.Encoding.UTF8, "application/json"));
                 if (response.Contains("FALSE")) return false;
                 return true;
             }
-           return false;
+            return false;
         }
 
-        public async Task<bool> UpdateUser([FromBody]UserDto user)
+        public async Task<bool> UpdateUser([FromBody] UserDto user)
         {
             if (ModelState.IsValid)
             {
@@ -161,15 +172,15 @@ namespace MindfulTime.UI.Controllers
                 var isShow = Convert.ToBoolean(TempData["UploadResult"].ToString());
                 ViewBag.ShowPopup = isShow;
             }
-
-            var userModel = new AuthUserModel
-            {
-                Email = HttpContext.Session.GetString("CurrentUserEmail"),
-                Password = HttpContext.Session.GetString("CurrentUserPassword")
-            };
-            var result = await CheckUserFromDb(userModel);
-            if (result.Id == Guid.Empty) return RedirectToAction("Auth", "WorkSpace");
-            return View("EditML",result);
+            var userModel = GetUserFromCookies();
+            var result = await CheckUserFromDb(
+                new AuthUserModel
+                {
+                    Email = userModel.Email,
+                    Password = userModel.Password
+                });
+            if (result.Role == "Admin") return RedirectToAction("Auth", "WorkSpace");
+            return View("EditML", result);
         }
 
         [HttpPost]
@@ -247,13 +258,55 @@ namespace MindfulTime.UI.Controllers
                 var response = await _httpRequestService.HttpRequestPost(URL.AUTH_CHECK_USER, new StringContent(JsonConvert.SerializeObject(authUser), encoding: System.Text.Encoding.UTF8, "application/json"));
                 if (response.Contains("FALSE")) return new UserDto();
                 var responseModel = JsonConvert.DeserializeObject<UserDto>(response);
+                string role = GetRoleFromToken(responseModel.Token);
+                responseModel.Role = role;
+                responseModel.Email = authUser.Email;
+                responseModel.Password = authUser.Password;
+                // Сохранение модели в куках
+                var options = new CookieOptions
+                {
+                    // Устанавливаем время жизни куки (например, 1 день)
+                    Expires = DateTime.Now.AddDays(1),
+                    IsEssential = true // Для GDPR
+                };
+
+                // Сериализуем модель в JSON
+                string jsonModel = JsonConvert.SerializeObject(responseModel);
+
+                // Сохраняем JSON в куки
+                HttpContext.Response.Cookies.Append("UserDtoCookie", jsonModel, options);
+
                 return responseModel;
             }
             catch (Exception)
             {
                 return new UserDto();
             }
-            
+        }
+        private string GetRoleFromToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadToken(token) as JwtSecurityToken;
+
+            if (jwtToken != null)
+            {
+                var roleClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "role");
+                if (roleClaim != null)
+                {
+                    return roleClaim.Value;
+                }
+            }
+            return null;
+        }
+        private UserDto GetUserFromCookies()
+        {
+            // Получаем JSON строку из куков
+            string jsonModel = HttpContext.Request.Cookies["UserDtoCookie"];
+
+            // Десериализуем JSON строку в объект UserDto
+            UserDto userDto = JsonConvert.DeserializeObject<UserDto>(jsonModel);
+
+            return userDto;
         }
     }
 }
