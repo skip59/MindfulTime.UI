@@ -224,6 +224,21 @@ namespace MindfulTime.UI.Controllers
             return null;
         }
 
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteEvent([FromQuery]string EventId)
+        {
+            if (ModelState.IsValid)
+            {
+                var response = await _httpRequestService.HttpRequestPost(URL.CALENDAR_DELETE_TASK, new StringContent(JsonConvert.SerializeObject(EventId), encoding: System.Text.Encoding.UTF8, "application/json"));
+                if (response.Contains("FALSE")) return null;
+                var responseModel = JsonConvert.DeserializeObject<EventDTO>(response);
+                string message = string.Empty;
+                return Json(new { message, responseModel.EventId });
+            };
+            return null;
+        }
+
         [HttpGet]
         public async Task<string> GetCalendarEvents()
         {

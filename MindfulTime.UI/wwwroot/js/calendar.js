@@ -226,9 +226,9 @@ $('#deleteEvent').on('click', function () {
     if (confirm(`Вы действительно хотите удалить задачу "${currentEvent.title}"?`)) {
         axios({
             method: 'post',
-            url: '/WorkSpace/DeleteEvent',
+            url: '/WorkSpace/DeleteEvent?eventId=' + currentEvent.eventId.toString(),
             data: {
-                "EventId": currentEvent.eventId
+                "EventId": currentEvent.eventId.toString()
             }
         }).then(function (res) {
             var message = res.data.message;
